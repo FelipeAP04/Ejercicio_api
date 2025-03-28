@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,9 +68,21 @@ func postIncidente(c *gin.Context) {
 	}
 }
 
+func getIncidenteById(c *gin.Context) {
+	id := c.Param("id")
+	for _, post := range posts {
+		if strconv.Itoa(post.ID) == id {
+			c.JSON(http.StatusOK, post)
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{"error": "Incidente not found"})
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/incidentes", getIncidentes)
 	router.POST("/incidentes", postIncidente)
+	router.GET("/incidentes/:id", getIncidenteById)
 	router.Run("localhost:8080")
 }
