@@ -79,10 +79,30 @@ func getIncidenteById(c *gin.Context) {
 	c.JSON(http.StatusNotFound, gin.H{"error": "Incidente not found"})
 }
 
+func putIncidenteById(c *gin.Context) {
+	id := c.Param("id")
+	for i, post := range posts {
+		if strconv.Itoa(post.ID) == id {
+			var newIncidente Incidente
+			if err := c.BindJSON(&newIncidente); err == nil {
+				newIncidente.ID = post.ID
+				posts[i] = newIncidente
+				c.JSON(http.StatusOK, newIncidente)
+				return
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid data"})
+				return
+			}
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{"error": "Incidente not found"})
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/incidentes", getIncidentes)
 	router.POST("/incidentes", postIncidente)
 	router.GET("/incidentes/:id", getIncidenteById)
+	router.PUT("/incidentes/:id", putIncidenteById)
 	router.Run("localhost:8080")
 }
