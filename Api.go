@@ -56,8 +56,20 @@ func getIncidentes(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 }
 
+func postIncidente(c *gin.Context) {
+	var newIncidente Incidente
+	if err := c.BindJSON(&newIncidente); err == nil {
+		newIncidente.ID = len(posts) + 1
+		posts = append(posts, newIncidente)
+		c.JSON(http.StatusCreated, newIncidente)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid data"})
+	}
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/incidentes", getIncidentes)
+	router.POST("/incidentes", postIncidente)
 	router.Run("localhost:8080")
 }
