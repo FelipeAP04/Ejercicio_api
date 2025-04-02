@@ -29,20 +29,18 @@ func connectToMongoDB() {
 
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
+		fmt.Println("Error al conectar con MongoDB:", err)
 		panic(err)
 	}
 
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-
-	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+	// Test connection
+	if err := client.Ping(context.TODO(), nil); err != nil {
+		fmt.Println("Error al hacer ping a MongoDB:", err)
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
+	// Set collection
 	coll = client.Database("db_incidentes").Collection("incidentes")
 }
 
@@ -50,10 +48,18 @@ func getIncidentes(c *gin.Context) {
 	var incidentes []Incidente
 	cursor, err := coll.Find(context.TODO(), bson.D{})
 	if err != nil {
+		fmt.Println("Error al obtener los datos:", err) // Log the error
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo obtener los datos"})
 		return
 	}
+	defer func() {
+		if err := cursor.Close(context.TODO()); err != nil {
+			fmt.Println("Error al cerrar el cursor:", err) // Log cursor close error
+		}
+	}()
+
 	if err = cursor.All(context.TODO(), &incidentes); err != nil {
+		fmt.Println("Error al decodificar los datos:", err) // Log the error
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo decodificar los datos"})
 		return
 	}
@@ -63,6 +69,7 @@ func getIncidentes(c *gin.Context) {
 func postIncidente(c *gin.Context) {
 	var newIncidente Incidente
 	if err := c.BindJSON(&newIncidente); err == nil {
+		fmt.Printf("Datos recibidos: %+v\n", newIncidente)
 		newIncidente.ID = int(time.Now().Unix())
 		_, err := coll.InsertOne(context.TODO(), newIncidente)
 		if err != nil {
