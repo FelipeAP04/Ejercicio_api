@@ -25,28 +25,24 @@ var coll *mongo.Collection
 
 func connectToMongoDB() {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI("mongodb+srv://Lipito:EneR3-18@apiincidentes.5zad9yj.mongodb.net/?retryWrites=true&w=majority&appName=ApiIncidentes").SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI("mongodb+srv://Lipito:Rotom3-18@apiincidentes.5zad9yj.mongodb.net/?retryWrites=true&w=majority&appName=ApiIncidentes").SetServerAPIOptions(serverAPI)
 
 	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
 		panic(err)
 	}
 
-	go func() {
-		defer func() {
-			if err = client.Disconnect(context.TODO()); err != nil {
-				panic(err)
-			}
-		}()
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
 	}()
 
-	// Test connection
 	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	// Set collection
 	coll = client.Database("db_incidentes").Collection("incidentes")
 }
 
@@ -54,11 +50,11 @@ func getIncidentes(c *gin.Context) {
 	var incidentes []Incidente
 	cursor, err := coll.Find(context.TODO(), bson.D{})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo obtener los datos"})
 		return
 	}
 	if err = cursor.All(context.TODO(), &incidentes); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo decodificar los datos"})
 		return
 	}
 	c.JSON(http.StatusOK, incidentes)
@@ -70,12 +66,12 @@ func postIncidente(c *gin.Context) {
 		newIncidente.ID = int(time.Now().Unix())
 		_, err := coll.InsertOne(context.TODO(), newIncidente)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert data"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al insertar el incidente"})
 			return
 		}
 		c.JSON(http.StatusCreated, newIncidente)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid data"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "datos invalidos"})
 	}
 }
 
@@ -84,7 +80,7 @@ func getIncidenteById(c *gin.Context) {
 	var incidente Incidente
 	err := coll.FindOne(context.TODO(), bson.D{{"id", id}}).Decode(&incidente)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Incidente not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "No se encontró el incidente"})
 		return
 	}
 	c.JSON(http.StatusOK, incidente)
@@ -97,12 +93,12 @@ func putIncidenteById(c *gin.Context) {
 		updatedIncidente.ID = id
 		_, err := coll.UpdateOne(context.TODO(), bson.D{{"id", id}}, bson.D{{"$set", updatedIncidente}})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update data"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Fallido al actualizar el incidente"})
 			return
 		}
 		c.JSON(http.StatusOK, updatedIncidente)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid data"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos invalidos"})
 	}
 }
 
@@ -110,10 +106,10 @@ func deleteIncidenteById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	_, err := coll.DeleteOne(context.TODO(), bson.D{{"id", id}})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar el incidente"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Incidente deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Incidente eliminado"})
 }
 
 func main() {
