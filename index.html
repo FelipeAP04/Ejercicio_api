@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Incidentes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gestión de Incidentes</h1>
+
+        <section>
+            <h2>Listado de Incidentes</h2>
+            <div id="incident-list"></div>
+            <button onclick="fetchIncidents()">Actualizar Listado</button>
+        </section>
+
+        <section>
+            <h2>Crear Nuevo Incidente</h2>
+            <div class="form-group">
+                <label for="empleado">Empleado</label>
+                <input type="text" id="empleado" placeholder="Nombre del empleado">
+            </div>
+            <div class="form-group">
+                <label for="tipo_equipo">Tipo de Equipo</label>
+                <input type="text" id="tipo_equipo" placeholder="Tipo de equipo">
+            </div>
+            <div class="form-group">
+                <label for="detalle_problema">Detalle del Problema</label>
+                <input type="text" id="detalle_problema" placeholder="Descripción del problema">
+            </div>
+            <div class="form-group">
+                <label for="dia_problema">Día del Problema</label>
+                <input type="date" id="dia_problema">
+            </div>
+            <div class="form-group">
+                <label for="estado">Estado</label>
+                <select id="estado">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en proceso">En Proceso</option>
+                    <option value="resuelto">Resuelto</option>
+                </select>
+            </div>
+            <button onclick="createIncident()">Crear Incidente</button>
+        </section>
+
+        <section>
+            <h2>Actualizar Estado de Incidente</h2>
+            <div class="form-group">
+                <label for="update-id">ID del Incidente</label>
+                <input type="number" id="update-id" placeholder="ID del incidente">
+            </div>
+            <div class="form-group">
+                <label for="update-estado">Nuevo Estado</label>
+                <select id="update-estado">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en proceso">En Proceso</option>
+                    <option value="resuelto">Resuelto</option>
+                </select>
+            </div>
+            <button onclick="updateIncident()">Actualizar Estado</button>
+        </section>
+
+        <section>
+            <h2>Eliminar Incidente</h2>
+            <div class="form-group">
+                <label for="delete-id">ID del Incidente</label>
+                <input type="number" id="delete-id" placeholder="ID del incidente">
+            </div>
+            <button onclick="deleteIncident()">Eliminar Incidente</button>
+        </section>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
